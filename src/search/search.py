@@ -113,6 +113,79 @@ def depthFirstSearch(problem):
     print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
     """
     "*** YOUR CODE HERE ***"
+
+    class Node():
+        def __init__(self, state, parent, action):
+            self.state = state
+            self.parent = parent
+            self.action = action
+
+    class StackFrontier():
+        def __init__(self):
+            self.frontier = []
+
+        def add(self, node):
+            self.frontier.append(node)
+
+        def contains_state(self, state):
+            return any(node.state == state for node in self.frontier)
+        
+        def empty(self): # Checa se a fronteira possui algum node
+            return len(self.frontier) == 0
+
+        def remove(self):
+            if self.empty():
+                raise Exception("empty frontier")
+            else:
+                node = self.frontier[-1] # O node a ser analisado é o último a ser colocado
+                self.frontier = self.frontier[:-1] # Eliminamos o node a ser analisado da fronteira
+                return node
+
+    # Inicializando um conjunto de nós explorados
+    explored_set = set()
+
+    # Pegando o estado inicial
+    start_state = problem.getStartState()
+
+    # Criando nó inicial com nosso primeiro estado
+    start_node = Node(start_state, None, None)
+
+    # Criando um objeto stack_frontier, que guardará os nós da fronteira
+    stack_frontier = StackFrontier()
+
+    # Adicionando nosso primeiro nó a fronteira
+    stack_frontier.add(start_node)
+
+    # Tirando o nosso primeiro nó da fronteira para análise 🤓
+    node_of_analysis = stack_frontier.remove()
+
+    # Verificando se o nó de análise possui o estado final
+    if problem.isGoalState(node_of_analysis.state):
+        # Se sim, alegria pura, aqui vamos ver as ações e nós que nos levaram até aqui
+        actions = []
+        cells = []
+
+        while node_of_analysis.parent is not None:
+            actions.append(node_of_analysis.action)
+            cells.append(node_of_analysis.state)
+            node_of_analysis = node_of_analysis.parent
+            actions.reverse()
+            print(problem.getCostOfActionSequence(actions))
+            return(actions)
+
+    else:
+        # Tristeza sem fim, pelo menos exploramos mais um nó
+        explored_set.add(node_of_analysis)
+
+        # Expandindo o nó
+        neighbors = problem.expand(node_of_analysis.state)
+
+        for neighbor in neighbors:
+            neighbor_state, action, step_cost = neighbor
+            if not stack_frontier.contains_state(neighbor_state) and neighbor_state not in explored_set:
+                child = Node(state = neighbor_state, parent = neighbor, action = action)
+                stack_frontier.add(child)
+
     util.raiseNotDefined()
 
 def breadthFirstSearch(problem):
