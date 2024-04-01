@@ -293,7 +293,7 @@ class CornersProblem(search.SearchProblem):
     You must select a suitable state space and child function
     """
 
-    def __init__(self, startingGameState):
+    def __init__(self, startingGameState, visualize = True):
         """
         Stores the walls, pacman's starting position and corners.
         """
@@ -308,6 +308,8 @@ class CornersProblem(search.SearchProblem):
         # Please add any code here which you would like to use
         # in initializing the problem
         "*** YOUR CODE HERE ***"
+        self.startState = (self.startingPosition, ())
+        self.visualize = visualize
 
     def getStartState(self):
         """
@@ -315,6 +317,7 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
+        return self.startState
         util.raiseNotDefined()
 
     def isGoalState(self, state):
@@ -322,6 +325,12 @@ class CornersProblem(search.SearchProblem):
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
+    
+        isGoal = False
+        if len(state[1]) == len(self.corners):
+            isGoal = True 
+
+        return isGoal
         util.raiseNotDefined()
 
     def expand(self, state):
@@ -340,6 +349,10 @@ class CornersProblem(search.SearchProblem):
             # Add a child state to the child list if the action is legal
             # You should call getActions, getActionCost, and getNextState.
             "*** YOUR CODE HERE ***"
+            position, self.cornersVisited = state
+            nextState = self.getNextState(state, action)
+            cost = self.getActionCost(state, action, nextState)
+            children.append( ( nextState, action, cost) )
 
         self._expanded += 1 # DO NOT CHANGE
         return children
@@ -367,9 +380,11 @@ class CornersProblem(search.SearchProblem):
         dx, dy = Actions.directionToVector(action)
         nextx, nexty = int(x + dx), int(y + dy)
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        nextPosition = (nextx, nexty)
+        if (nextPosition in self.corners) and (nextPosition not in self.cornersVisited):
+            self.cornersVisited = self.cornersVisited + (nextPosition, )
         # you will need to replace the None part of the following tuple.
-        return ((nextx, nexty), None)
+        return ((nextx, nexty), self.cornersVisited)
 
     def getCostOfActionSequence(self, actions):
         """
@@ -383,7 +398,6 @@ class CornersProblem(search.SearchProblem):
             x, y = int(x + dx), int(y + dy)
             if self.walls[x][y]: return 999999
         return len(actions)
-
 
 def cornersHeuristic(state, problem):
     """
