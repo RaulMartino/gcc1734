@@ -141,8 +141,6 @@ def depthFirstSearch(problem):
                 self.frontier = self.frontier[:-1] # Eliminamos o node a ser analisado da fronteira
                 return node
 
-    from game import Directions
-
     # Criando um objeto stack_frontier, que guardará os nós da fronteira
     stack_frontier = StackFrontier()
 
@@ -194,6 +192,80 @@ def depthFirstSearch(problem):
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
+
+    class Node():
+        def __init__(self, state, parent, action):
+            self.state = state
+            self.parent = parent
+            self.action = action
+
+    class QueueFrontier():
+        def __init__(self):
+            self.frontier = []
+
+        def add(self, node):
+            self.frontier.append(node)
+
+        def contains_state(self, state):
+            return any(node.state == state for node in self.frontier)
+        
+        def empty(self): # Checa se a fronteira possui algum node
+            return len(self.frontier) == 0
+
+        def remove(self):
+            if self.empty():
+                raise Exception("empty frontier")
+            else:
+                node = self.frontier[0] # O node a ser analisado é o mais antigo colocado
+                self.frontier = self.frontier[1:] # Eliminamos o node a ser analisado da fronteira
+                return node
+
+    # Criando um objeto queue_frontier, que guardará os nós da fronteira
+    queue_frontier = QueueFrontier()
+
+    # Inicializando o conjunto de nós explorados
+    explored_states_set = set()
+
+    # Pegando o estado inicial
+    start_state = problem.getStartState()
+
+    # Criando nó inicial com nosso primeiro estado
+    start_node = Node(state = start_state, parent = None, action = None)
+
+    # Adicionando nosso primeiro nó a fronteira
+    queue_frontier.add(start_node)
+
+    while True:
+        # Verificando se a fronteira está vazia, se estiver, não tem solução
+        if queue_frontier.empty():
+            raise Exception("No solution")
+        
+        # Remove um nó da fronteira e guarda ele
+        node = queue_frontier.remove()
+        
+        # Verifica se esse nó retirado possui o estado final
+        if problem.isGoalState(node.state):
+            action_sequence = []
+            
+            while node.parent is not None:
+                action_sequence.append(node.action)
+                node = node.parent
+
+            action_sequence.reverse()
+            return(action_sequence)
+        else:
+            # Se o nó não está no estado final, colocar no explored_states_set
+            explored_states_set.add(node.state)
+            
+            # Expandindo o nó
+            neighbors = problem.expand(node.state)
+
+            for neighbor in neighbors:
+                neighbor_state, action, step_cost = neighbor
+                if not queue_frontier.contains_state(neighbor_state) and neighbor_state not in explored_states_set:
+                    child = Node(state = neighbor_state, parent = node, action = action)
+                    queue_frontier.add(child)
+
     util.raiseNotDefined()
 
 def nullHeuristic(state, problem=None):
