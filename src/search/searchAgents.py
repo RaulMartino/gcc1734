@@ -416,6 +416,24 @@ def cornersHeuristic(state, problem):
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
+
+    def chebyshev_distance(point1, point2):
+        return max(abs(point2[0] - point1[0]), abs(point2[1] - point1[1]))
+    
+    position, visitedCorners = state
+
+    unvisitedCorners = set(corners) - set(visitedCorners)
+    
+    closest_corner = None
+    min_distance = float('inf')
+
+    for corner in corners:
+        distance = chebyshev_distance(position, corner)
+        if distance < min_distance:
+            min_distance = distance
+            closest_corner = corner
+
+    return min_distance - 3
     return 0 # Default to trivial solution
 
 class AStarCornersAgent(SearchAgent):
