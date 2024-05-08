@@ -14,7 +14,6 @@
 
 # imports from python standard library
 import grading
-import imp
 import optparse
 import os
 import pprint
@@ -22,6 +21,8 @@ import re
 import sys
 import projectParams
 import random
+import importlib.machinery
+imp = importlib.machinery.SourceFileLoader('imp', 'D:/raulm/Repos/Cefet/IA/gcc1734/imp.py').load_module()
 random.seed(0)
 try:
     from pacman import GameState
