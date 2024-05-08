@@ -74,7 +74,31 @@ class ReflexAgent(Agent):
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
         "*** YOUR CODE HERE ***"
-        return successorGameState.getScore()
+        currentFood = currentGameState.getFood()
+        ghostPositions = successorGameState.getGhostPositions()
+        for p in ghostPositions:
+            # If a ghost is at the new position or next to it
+            if p == newPos or util.manhattanDistance(p, newPos) == 1:
+                # Don't go there
+                return(float('-inf'))
+            # If there is food in the new position
+            elif currentFood[newPos[0]][newPos[1]]:
+                # There is no ghost there or next to it,
+                # so go there and eat the dot
+                return float('inf')
+        
+        # Pacman is not in immediate danger in the new position, but there is no food there
+        # Now estimating the nearest food dot:
+        minDist = float('inf')
+        food = currentFood.asList()
+        for f in food:
+            dist = util.manhattanDistance(f, newPos)
+            if dist < minDist:
+                minDist = dist
+        
+        # We return -minDist, because the higher value is better,
+        # and a state near a food dot is more preferable.
+        return -minDist
 
 def scoreEvaluationFunction(currentGameState):
     """
