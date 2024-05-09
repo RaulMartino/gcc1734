@@ -226,52 +226,76 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
+        # Lista de todas as ações legais para o agente com índice 0
         actions = gameState.getLegalActions(0)
+        # Valor máximo inicial
         maxResult = float('-inf')
+        # Limite superior e inferior
         a = float('-inf')
         b = float('inf')
+        # Percorre todas as ações possíveis
         for action in actions:
-            # MAX (agent index = 0) plays first
+            # O agente com índice 0 (MAX) joga primeiro
             successor = gameState.generateSuccessor(0, action)
-            # The first ghost (index = 1) plays next. Depth starts at 0.
-            currentResult = self.minValue( successor, 0, 1, a, b )
+            # O primeiro fantasma (índice 1) joga a próxima rodada
+            currentResult = self.minValue(successor, 0, 1, a, b)
+            # Atualiza o valor máximo, a ação e o limite superior se necessário
             if currentResult > maxResult:
                 maxResult = currentResult
                 maxAction = action
-                a = max( (a, currentResult) )
+                a = max((a, currentResult))
         return maxAction
 
     def maxValue(self, gameState, currDepth, a, b):
+        """
+        Valor máximo para o agente com índice 0
+        """
+        # Verifica se é uma situação de vitória, derrota ou se atingiu a profundidade máxima
         if gameState.isWin() or gameState.isLose() or currDepth == self.depth:
             return self.evaluationFunction(gameState)
+        # Lista de todas as ações legais para o agente com índice 0
         actions = gameState.getLegalActions(0)
+        # Valor máximo inicial
         maxValue = float('-inf')
+        # Percorre todas as ações possíveis
         for action in actions:
             successor = gameState.generateSuccessor(0, action)
-            # Agent with index == 1 (the first ghost) plays next
-            maxValue = max( (maxValue, self.minValue(successor, currDepth, 1, a, b)) )
+            # O primeiro fantasma (índice 1) joga a próxima rodada
+            maxValue = max((maxValue, self.minValue(successor, currDepth, 1, a, b)))
+            # Se o valor máximo for maior que o limite inferior, retorna o valor máximo
             if maxValue > b:
                 return maxValue
-            a = max( (a,maxValue) )
+            # Atualiza o limite superior se necessário
+            a = max((a, maxValue))
         return maxValue
 
     def minValue(self, gameState, currDepth, currAgent, a, b):
+        """
+        Valor mínimo para o agente com índice currAgent
+        """
+        # Verifica se é uma situação de vitória, derrota ou se atingiu a profundidade máxima
         if gameState.isWin() or gameState.isLose() or currDepth == self.depth:
             return self.evaluationFunction(gameState)
+        # Lista de todas as ações legais para o agente com índice currAgent
         actions = gameState.getLegalActions(currAgent)
+        # Valor mínimo inicial
         minValue = float('inf')
+        # Número total de agentes
         agents = gameState.getNumAgents()
+        # Percorre todas as ações possíveis
         for action in actions:
             successor = gameState.generateSuccessor(currAgent, action)
+            # Se ainda há agentes para escolher suas jogadas, aumenta o índice do agente atual e chama minValue novamente
             if currAgent < agents - 1:
-                # There are still some ghosts to choose their moves, so increase agent index and call minValue again
-                minValue = min( (minValue, self.minValue(successor, currDepth, currAgent + 1, a, b)) )
+                minValue = min((minValue, self.minValue(successor, currDepth, currAgent + 1, a, b)))
             else:
-                # Depth is increased when it is MAX's turn
-                minValue = min( (minValue, self.maxValue(successor, currDepth + 1, a, b)) )
+                # Aumenta a profundidade se é a vez do agente com índice 0 (MAX)
+                minValue = min((minValue, self.maxValue(successor, currDepth + 1, a, b)))
+            # Se o valor mínimo for menor que o limite superior, retorna o valor mínimo
             if minValue < a:
                 return minValue
-            b = min( (b,minValue) )
+            # Atualiza o limite inferior se necessário
+            b = min((b, minValue))
         return minValue
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
@@ -287,42 +311,46 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         legal moves.
         """
         "*** YOUR CODE HERE ***"
+        # Listagem de todas as jogadas legais do primeiro agente (pacman)
         actions = gameState.getLegalActions(0)
+        # Inicialização de variáveis
         maxAction = 'Stop'
         maxResult = float('-inf')
+        # Para cada jogada legal, geramos o sucessor correspondente
+        # e calculamos o resultado esperado para o primeiro agente
         for a in actions:
-            # MAX (agent index = 0) plays first
-            successor = gameState.generateSuccessor(0,a)
-            # Agent with index == 1 (the first ghost) plays next. Depth starts at 0.
-            currentResult = self.chanceExpect(successor, 0, 1)
+            successor = gameState.generateSuccessor(0, a)
+            currentResult = self.calculaExpect(successor, 0, 1)
             if currentResult > maxResult:
                 maxResult = currentResult
                 maxAction = a
         return maxAction
-    
-    def maxExpect(self, gameState, currDepth):
+
+    def calculaMax(self, gameState, currDepth):
+        """
+        Calcula o valor máximo esperado para o primeiro agente
+        """
         if gameState.isWin() or gameState.isLose() or currDepth == self.depth:
             return self.evaluationFunction(gameState)
         actions = gameState.getLegalActions(0)
-        successors = []
-        for a in actions:
-            successors.append( gameState.generateSuccessor(0, a) )
-        # Agent with index == 1 (the first ghost) plays next
-        return max( [self.chanceExpect(s, currDepth, 1) for s in successors] )
+        successors = [gameState.generateSuccessor(0, a) for a in actions]
+        return max([self.calculaExpect(s, currDepth, 1) for s in successors])
 
-    def chanceExpect(self, gameState, currDepth, currAgent):
+    def calculaExpect(self, gameState, currDepth, currAgent):
+        """
+        Calcula o valor esperado para o agente corrente
+        """
         if gameState.isWin() or gameState.isLose() or currDepth == self.depth:
             return self.evaluationFunction(gameState)
         actions = gameState.getLegalActions(currAgent)
-        successors = []
-        for a in actions:
-            successors.append( gameState.generateSuccessor(currAgent, a) )
+        successors = [gameState.generateSuccessor(currAgent, a) for a in actions]
         if currAgent < gameState.getNumAgents() - 1:
-            # There are still some ghosts to choose their moves, so increase agent index and call chanceExpect again
-            return sum( [self.chanceExpect(s, currDepth, currAgent + 1 ) for s in successors ] )/len(successors)
+            # Ainda existem agentes a serem escolhidos, então chamamos recursivamente
+            # calculaExpect com o próximo agente
+            return sum([self.calculaExpect(s, currDepth, currAgent + 1) for s in successors]) / len(successors)
         else:
-            # Depth is increased when it is MAX's turn
-            return sum( [self.maxExpect(s, currDepth + 1 ) for s in successors ] )/len(successors)
+            # Aumentamos a profundidade quando é o turno do primeiro agente
+            return sum([self.calculaMax(s, currDepth + 1) for s in successors]) / len(successors)
 
 def betterEvaluationFunction(currentGameState):
 
