@@ -226,27 +226,26 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        # Lista de todas as ações legais para o agente com índice 0
-        actions = gameState.getLegalActions(0)
-        # Valor máximo inicial
-        maxResult = float('-inf')
-        # Limite superior e inferior
-        a = float('-inf')
-        b = float('inf')
+        # Inicializa o valor máximo, a ação e o limite superior
+        max_result, max_action, alpha = float('-inf'), None, float('-inf')
+        beta = float('inf')
+
         # Percorre todas as ações possíveis
-        for action in actions:
+        for action in gameState.getLegalActions(0):
             # O agente com índice 0 (MAX) joga primeiro
             successor = gameState.generateSuccessor(0, action)
             # O primeiro fantasma (índice 1) joga a próxima rodada
-            currentResult = self.minValue(successor, 0, 1, a, b)
-            # Atualiza o valor máximo, a ação e o limite superior se necessário
-            if currentResult > maxResult:
-                maxResult = currentResult
-                maxAction = action
-                a = max((a, currentResult))
-        return maxAction
+            current_result = self.minValue(successor, 0, 1, alpha, beta)
 
-    def maxValue(self, gameState, currDepth, a, b):
+            # Verifica se o valor atual é maior do que o máximo atual
+            if current_result > max_result:
+                # Atualiza o máximo, a ação e o limite superior
+                max_result, max_action, alpha = current_result, action, max(alpha, current_result)
+
+        # Retorna a ação com o máximo de valor encontrado
+        return max_action
+
+    def maxValue(self, gameState, currDepth, alpha, beta):
         """
         Valor máximo para o agente com índice 0
         """
@@ -254,22 +253,22 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         if gameState.isWin() or gameState.isLose() or currDepth == self.depth:
             return self.evaluationFunction(gameState)
         # Lista de todas as ações legais para o agente com índice 0
-        actions = gameState.getLegalActions(0)
+        legalActions = gameState.getLegalActions(0)
         # Valor máximo inicial
         maxValue = float('-inf')
         # Percorre todas as ações possíveis
-        for action in actions:
+        for action in legalActions:
             successor = gameState.generateSuccessor(0, action)
             # O primeiro fantasma (índice 1) joga a próxima rodada
-            maxValue = max((maxValue, self.minValue(successor, currDepth, 1, a, b)))
+            maxValue = max((maxValue, self.minValue(successor, currDepth, 1, alpha, beta)))
             # Se o valor máximo for maior que o limite inferior, retorna o valor máximo
-            if maxValue > b:
+            if maxValue > beta:
                 return maxValue
             # Atualiza o limite superior se necessário
-            a = max((a, maxValue))
+            alpha = max((alpha, maxValue))
         return maxValue
 
-    def minValue(self, gameState, currDepth, currAgent, a, b):
+    def minValue(self, gameState, currDepth, currAgent, alpha, beta):
         """
         Valor mínimo para o agente com índice currAgent
         """
@@ -277,25 +276,27 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         if gameState.isWin() or gameState.isLose() or currDepth == self.depth:
             return self.evaluationFunction(gameState)
         # Lista de todas as ações legais para o agente com índice currAgent
-        actions = gameState.getLegalActions(currAgent)
+        legalMoves = gameState.getLegalActions(currAgent)
         # Valor mínimo inicial
         minValue = float('inf')
         # Número total de agentes
         agents = gameState.getNumAgents()
         # Percorre todas as ações possíveis
-        for action in actions:
+        for action in legalMoves:
+            if action == Directions.STOP: continue
+
             successor = gameState.generateSuccessor(currAgent, action)
             # Se ainda há agentes para escolher suas jogadas, aumenta o índice do agente atual e chama minValue novamente
             if currAgent < agents - 1:
-                minValue = min((minValue, self.minValue(successor, currDepth, currAgent + 1, a, b)))
+                minValue = min((minValue, self.minValue(successor, currDepth, currAgent + 1, alpha, beta)))
             else:
                 # Aumenta a profundidade se é a vez do agente com índice 0 (MAX)
-                minValue = min((minValue, self.maxValue(successor, currDepth + 1, a, b)))
+                minValue = min((minValue, self.maxValue(successor, currDepth + 1, alpha, beta)))
             # Se o valor mínimo for menor que o limite superior, retorna o valor mínimo
-            if minValue < a:
+            if minValue < alpha:
                 return minValue
             # Atualiza o limite inferior se necessário
-            b = min((b, minValue))
+            beta = min((beta, minValue))
         return minValue
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
