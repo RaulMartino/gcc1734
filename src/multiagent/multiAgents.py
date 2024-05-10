@@ -313,18 +313,18 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         """
         "*** YOUR CODE HERE ***"
         # Listagem de todas as jogadas legais do primeiro agente (pacman)
-        actions = gameState.getLegalActions(0)
+        legalActions = gameState.getLegalActions(0)
         # Inicialização de variáveis
         maxAction = 'Stop'
         maxResult = float('-inf')
         # Para cada jogada legal, geramos o sucessor correspondente
         # e calculamos o resultado esperado para o primeiro agente
-        for a in actions:
-            successor = gameState.generateSuccessor(0, a)
-            currentResult = self.calculaExpect(successor, 0, 1)
+        for action in legalActions:
+            successor = gameState.generateSuccessor(0, action)
+            currentResult = self.maxValue(successor, 0, 1)
             if currentResult > maxResult:
                 maxResult = currentResult
-                maxAction = a
+                maxAction = action
         return maxAction
 
     def calculaMax(self, gameState, currDepth):
@@ -333,22 +333,27 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         """
         if gameState.isWin() or gameState.isLose() or currDepth == self.depth:
             return self.evaluationFunction(gameState)
-        actions = gameState.getLegalActions(0)
-        successors = [gameState.generateSuccessor(0, a) for a in actions]
-        return max([self.calculaExpect(s, currDepth, 1) for s in successors])
+        legalActions = gameState.getLegalActions(0)
+        successors = []
+        for action in legalActions:
+            successors.append(gameState.generateSuccessor(0, action))
+        return max([self.maxValue(s, currDepth, 1) for s in successors])
 
-    def calculaExpect(self, gameState, currDepth, currAgent):
+    def maxValue(self, gameState, currDepth, currAgent):
         """
         Calcula o valor esperado para o agente corrente
         """
         if gameState.isWin() or gameState.isLose() or currDepth == self.depth:
             return self.evaluationFunction(gameState)
-        actions = gameState.getLegalActions(currAgent)
-        successors = [gameState.generateSuccessor(currAgent, a) for a in actions]
+        legalActions = gameState.getLegalActions(currAgent)
+        successors = []
+        for action in legalActions:
+            if action == Directions.STOP: continue
+            successors.append(gameState.generateSuccessor(currAgent, action))
         if currAgent < gameState.getNumAgents() - 1:
             # Ainda existem agentes a serem escolhidos, então chamamos recursivamente
-            # calculaExpect com o próximo agente
-            return sum([self.calculaExpect(s, currDepth, currAgent + 1) for s in successors]) / len(successors)
+            # maxValue com o próximo agente
+            return sum([self.maxValue(s, currDepth, currAgent + 1) for s in successors]) / len(successors)
         else:
             # Aumentamos a profundidade quando é o turno do primeiro agente
             return sum([self.calculaMax(s, currDepth + 1) for s in successors]) / len(successors)
