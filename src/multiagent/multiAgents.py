@@ -356,7 +356,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
             return sum([self.maxValue(s, currDepth, currAgent + 1) for s in successors]) / len(successors)
         else:
             # Aumentamos a profundidade quando é o turno do primeiro agente
-            return sum([self.calculaMax(s, currDepth + 1) for s in successors]) / len(successors)
+            return sum([self.calculaMax(s, currDepth + 1) for s in successors])
 
 def betterEvaluationFunction(currentGameState):
 
