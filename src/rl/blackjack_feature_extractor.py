@@ -73,7 +73,26 @@ class BlackjackFeatureExtractor(FeatureExtractor):
     return 1.0
 
   def f1(self, state, action):
-    # Implemente esta e outras features que achar adequadas.
-    return 0 
+    player_hand_value = state[0]  # O valor da mão do jogador
+    if player_hand_value >= 20:
+        return 1
+    elif player_hand_value >= 12:
+        return 0.5
+    else:
+        return 0
+
+def f2(self, state, action):
+    dealer_showing_card = state[1]  # O valor da carta visível do dealer
+    if dealer_showing_card >= 10:
+        return 1
+    elif dealer_showing_card >= 7:
+        return 0.5
+    else:
+        return 0
+
+def f3(self, state, action):
+    usable_ace = state[2]  # Se o jogador tem um Ás utilizável
+    return 2 if usable_ace else 0
+
 
 
