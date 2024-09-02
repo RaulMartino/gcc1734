@@ -3,18 +3,20 @@ import argparse
 import gymnasium as gym
 import matplotlib.pyplot as plt
 from scipy.signal import savgol_filter
-from tql import QLearningAgentTabular
+from tql_mountain_car import QLearningAgentTabular
 
 from taxi_environment import TaxiEnvironment
 from blackjack_environment import BlackjackEnvironment
 from cliffwalking_environment import CliffWalkingEnvironment
 from frozenlake_environment import FrozenLakeEnvironment
+from mountain_car_environment import MountainCarEnvironment
 
 environment_dict = {
     "Blackjack-v1": BlackjackEnvironment,
     "Taxi-v3": TaxiEnvironment,
     "CliffWalking-v0": CliffWalkingEnvironment,
-    "FrozenLake-v1": FrozenLakeEnvironment
+    "FrozenLake-v1": FrozenLakeEnvironment,
+    "MountainCar-v0": MountainCarEnvironment
 }
 
 if __name__ == "__main__":
