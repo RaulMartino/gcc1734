@@ -70,7 +70,6 @@ class QLearningAgentTabular:
         new_state, reward, terminated, truncated, info = self.env.step(action)
         new_state_id = self.env.get_state_id(new_state)
         new_state = new_state_id
-        assert (not truncated)
 
         if reward < 0:
             total_penalties += reward
