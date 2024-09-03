@@ -8,11 +8,13 @@ from gymnasium.wrappers import TimeLimit
 from taxi_environment import TaxiEnvironment
 from blackjack_environment import BlackjackEnvironment
 from cliffwalking_environment import CliffWalkingEnvironment
+from frozenlake_environment import FrozenLakeEnvironment
 
 environment_dict = {
     "Blackjack-v1": BlackjackEnvironment,
     "Taxi-v3": TaxiEnvironment,
     "CliffWalking-v0": CliffWalkingEnvironment,
+    "FrozenLake-v1": FrozenLakeEnvironment
 }
 
 if __name__ == "__main__":
@@ -32,7 +34,11 @@ if __name__ == "__main__":
     learning_rate = args.learning_rate
     gamma = args.gamma
 
-    env = gym.make(env_name)
+    if env_name == "FrozenLake-v1":
+        env = gym.make(env_name, desc=None, map_name="4x4", is_slippery=True)
+    else:
+        env = gym.make(env_name).env
+
     env = TimeLimit(env, max_episode_steps=args.max_steps)
     env = environment_dict[env_name](env)
 
