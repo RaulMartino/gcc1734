@@ -74,7 +74,7 @@ class BlackjackFeatureExtractor(FeatureExtractor):
 
   def f1(self, state, action):
     player_hand_value = state[0]  # O valor da mão do jogador
-    if player_hand_value >= 20:
+    if player_hand_value >= 12 and player_hand_value <= 21:
         return 1
     elif player_hand_value >= 12:
         return 0.5
