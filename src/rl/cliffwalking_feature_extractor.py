@@ -25,7 +25,6 @@ class CliffWalkingFeatureExtractor(FeatureExtractor):
         self.features_list.append(self.f0)
         self.features_list.append(self.f1)
         self.features_list.append(self.f2)
-        self.features_list.append(self.f3)
 
     def get_num_features(self):
         '''
@@ -48,9 +47,9 @@ class CliffWalkingFeatureExtractor(FeatureExtractor):
     def is_terminal_state(self, state):
         '''
         Checks if the given state is a terminal state.
-        In CliffWalking, the terminal state is the goal position (3, 11).
+        In CliffWalking, the terminal state is 47 (location [3, 11]).
         '''
-        return state == (3, 11)
+        return state == 47
 
     def get_actions(self):
         '''
@@ -82,30 +81,70 @@ class CliffWalkingFeatureExtractor(FeatureExtractor):
         '''
         Distance to goal feature.
         '''
-        goal = (3, 11)
-        position = (state // 12, state % 12)
-        distance = self.__manhattanDistance(position, goal)
+        goal_state = 47
+        coord_state = self.state_to_position(state)
+        coord_goal = self.state_to_position(goal_state)
+        next_coord = coord_state
+        if action == Actions.UP:
+            next_coord = (coord_state[0] - 1, coord_state[1])
+        elif action == Actions.RIGHT:
+            next_coord = (coord_state[0], coord_state[1] + 1)
+        elif action == Actions.DOWN:
+            next_coord = (coord_state[0] + 1, coord_state[1])
+        elif action == Actions.LEFT:
+            next_coord = (coord_state[0], coord_state[1] - 1)
+        distance = self.manhattan_distance(next_coord, coord_goal)
         return 1.0 / (distance + 1)  # Adding 1 to avoid division by zero
-
+    
     def f2(self, state, action):
         '''
         Proximity to cliff feature.
         '''
-        position = (state // 12, state % 12)
-        if position[0] == 3 and 1 <= position[1] <= 10:
-            return 1.0
+        cliff_states = range(37, 47)
+        coord_state = self.state_to_position(state)
+        next_coord = coord_state
+        if action == Actions.UP:
+            next_coord = (coord_state[0] - 1, coord_state[1])
+        elif action == Actions.RIGHT:
+            next_coord = (coord_state[0], coord_state[1] + 1)
+        elif action == Actions.DOWN:
+            next_coord = (coord_state[0] + 1, coord_state[1])
+        elif action == Actions.LEFT:
+            next_coord = (coord_state[0], coord_state[1] - 1)
+        for cliff_state in cliff_states:
+            coord_cliff = self.state_to_position(cliff_state)
+            if next_coord == coord_cliff:
+                return -1.0
         return 0.0
 
-    def f3(self, state, action):
+    @staticmethod
+    def state_to_position(state):
         '''
-        Progress along x-axis feature.
+        Converts a state number to a (row, col) position.
         '''
-        position = (state // 12, state % 12)
-        return position[1] / 11.0  # Normalize by grid width
+        row = state // 12
+        col = state % 12
+        return (row, col)
 
     @staticmethod
-    def __manhattanDistance(xy1, xy2):
+    def position_to_state(position):
+        '''
+        Converts a (row, col) position to a state number.
+        '''
+        return position[0] * 12 + position[1]
+    
+    @staticmethod
+    def state_to_position(state):
+        '''
+        Converts a state number to a (row, col) position.
+        '''
+        row = state // 12
+        col = state % 12
+        return (row, col)
+    
+    @staticmethod
+    def manhattan_distance(xy1, xy2):
         '''
         Computes the Manhattan distance between two points.
         '''
-        return abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])
+        return abs(xy1[0] - xy2[0]) + abs(xy1[1]-xy2[1])
